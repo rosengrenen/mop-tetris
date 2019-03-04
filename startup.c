@@ -23,6 +23,7 @@ asm volatile(
 
 #include "graphics.h"
 #include "keyboard.h"
+#include "types.h"
 
 void app_init()
 {
@@ -37,9 +38,9 @@ void app_init()
 #define FIELD_BLOCK_SIZE (64 / FIELD_WIDTH)
 void render_block(int x, int y)
 {
-    for (unsigned int i = 0; i < FIELD_BLOCK_SIZE; ++i)
+    for (uint32_t i = 0; i < FIELD_BLOCK_SIZE; ++i)
     {
-        for (unsigned int j = 0; j < FIELD_BLOCK_SIZE; ++j)
+        for (uint32_t j = 0; j < FIELD_BLOCK_SIZE; ++j)
         {
             graphic_pixel(y * FIELD_BLOCK_SIZE + i, (FIELD_BLOCK_SIZE - 1 - x) * FIELD_BLOCK_SIZE + j, 1);
         }
@@ -77,16 +78,129 @@ void field_render()
     }
 }
 
+typedef struct tPoint
+{
+    uint8_t x, y;
+} POINT;
+
+typedef struct tShape
+{
+    int32_t size;
+    POINT points[4];
+} SHAPE, *PSHAPE;
+
+typedef struct tMoveableShape
+{
+    SHAPE shape;
+    uint8_t pos_x, pos_y;
+} MOVABLESHAPE;
+
+void render_shape(MOVABLESHAPE* shape)
+{
+    for (uint8_t i = 0; i < 4; ++i)
+    {
+        render_block(shape->pos_x + shape->shape.points[i].x,
+                     shape->pos_y + shape->shape.points[i].y);
+    }
+}
+
+SHAPE o_shape = {
+    2,
+    {
+        { 0, 0 }, { 1, 0 },
+        { 0, 1 }, { 1, 1 }
+    }
+};
+
+SHAPE i_shape = {
+    4,
+    {
+        { 1, 0 },
+        { 1, 1 }, 
+        { 1, 2 },
+        { 1, 3 }
+    }
+};
+
+SHAPE s_shape = {
+    3,
+    {
+                  { 1, 0 }, { 2, 0 },
+        { 0, 1 }, { 1, 1 }, 
+    }
+};
+
+SHAPE z_shape = {
+    3,
+    {
+        { 0, 0 }, { 1, 0 },
+                  { 1, 1 }, { 2, 1 }
+    }
+};
+
+SHAPE l_shape = {
+    3,
+    {
+        { 0, 0 },
+        { 0, 1 }, 
+        { 0, 2 }, { 1, 2 }
+    }
+};
+
+SHAPE j_shape = {
+    3,
+    {
+                  { 1, 0 },
+                  { 1, 1 }, 
+        { 0, 2 }, { 1, 2 }
+    }
+};
+
+SHAPE t_shape = {
+    3,
+    {
+        { 0, 1 }, { 1, 1 }, { 2, 1 },
+                  { 1, 2 }
+    }
+};
 
 int main()
 {
     app_init();
-    field_set_block(0, 0);    
-    field_set_block(5, 0);
+
+    PSHAPE shapes[7] = {
+        &o_shape,
+        &i_shape,
+        &s_shape,
+        &z_shape,
+        &l_shape,
+        &j_shape,
+        &t_shape
+    };
+
+    MOVABLESHAPE sh = {
+        *shapes[3],
+        0, 0
+    };
 
     while (1)
     {
+        switch (keyb()) {
+            case 8:
+                sh.pos_y++;
+                break;
+            case 2:
+                sh.pos_y--;
+                break;
+            case 4:
+                sh.pos_x--;
+                break;
+            case 6:
+                sh.pos_x++;
+                break;
+        }
         field_render();
+        render_shape(&sh);
         graphic_swap();
     }
 }
