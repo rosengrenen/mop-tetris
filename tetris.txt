@@ -1,1 +1,0 @@
-./Debug/random.c.o ./Debug/tetris.c.o ./Debug/field.c.o ./Debug/keyboard.c.o ./Debug/tile.c.o ./Debug/startup.c.o ./Debug/delay.c.o ./Debug/shape.c.o ./Debug/graphics.c.o

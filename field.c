@@ -30,3 +30,11 @@ void field_draw(PFIELD field)
         }
     }
 }
+
+void field_add_shape(PFIELD field, PSHAPE shape)
+{
+	for (uint8_t i = 0; i < 4; ++i)
+    {
+		field->set_tile(field, shape->geometry.points[i].x, shape->geometry.points[i].y);
+    }
+}

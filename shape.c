@@ -73,7 +73,7 @@ PGEOMETRY geometries[7] = {
 	&t_geometry
 };
 
-void draw_shape(PSHAPE shape)
+void shape_draw(PSHAPE shape)
 {
     for (uint8_t i = 0; i < 4; ++i)
     {
@@ -85,5 +85,13 @@ void draw_shape(PSHAPE shape)
 GEOMETRY random_geometry()
 {
 	// TODO: Mod 7 and div 7 stall the program for some reason
-	return *geometries[rand() % 7];
+	//uint32_t random = rand();
+	//rand %= 7;
+	uint32_t random;
+	do
+	{
+		random = rand();
+		random = random - (random / 8) * 8;
+	} while (random >= 7);
+	return *geometries[random];
 }

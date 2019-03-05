@@ -21,7 +21,7 @@ typedef struct tShape
 	void (* draw) (struct tShape *);
 } SHAPE, *PSHAPE;
 
-void draw_shape(PSHAPE geometry);
+void shape_draw(PSHAPE geometry);
 GEOMETRY random_geometry();
 
 #endif // SHAPE_H
