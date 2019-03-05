@@ -20,6 +20,16 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="random.c"/>
+    <File Name="tetris.c"/>
+    <File Name="field.c"/>
+    <File Name="tile.c"/>
+    <File Name="tile.h"/>
+    <File Name="random.h"/>
+    <File Name="shape.c"/>
+    <File Name="field.h"/>
+    <File Name="shape.h"/>
+    <File Name="tetris.h"/>
     <File Name="types.h"/>
     <File Name="keyboard.h"/>
     <File Name="keyboard.c"/>
@@ -42,7 +52,7 @@
       </Linker>
       <ResourceCompiler Options=""/>
     </GlobalSettings>
-    <Configuration Name="Debug" CompilerType="Cross GCC (arm-none-eabi)" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+    <Configuration Name="Debug" CompilerType="Cross GCC ( arm-none-eabi )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-g;-O0;-Wall" C_Options="-g;-O0;-mthumb;-Wall;-march=armv6-m;-msoft-float;-Wa,-adhln=test.s" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
         <Preprocessor Value="SIMULATOR"/>
@@ -52,7 +62,7 @@
         <Library Value="c_nano"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/$(ProjectName).elf" IntermediateDirectory="./Debug" Command="$(ProjectPath)/$(IntermediateDirectory)/$(ProjectName).elf" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/$(ProjectName).elf" IntermediateDirectory="./Debug" Command="$(ProjectPath)/$(IntermediateDirectory)/$(ProjectName).elf" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
       <BuildSystem Name="Default"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[ARM_V6LIB=$(GccArmDir)/arm-none-eabi/lib/thumb/v6-m
@@ -68,8 +78,8 @@ monitor restart</PostConnectCommands>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">$(GccArmDir)/bin/arm-none-eabi-objcopy -S -O srec  $(IntermediateDirectory)/$(ProjectName).elf $(IntermediateDirectory)/$(ProjectName).s19</Command>
-        <Command Enabled="yes">$(GccArmDir)/bin/arm-none-eabi-objdump -D -S $(IntermediateDirectory)/$(ProjectName).elf &gt; $(IntermediateDirectory)/$(ProjectName).dass</Command>
+        <Command Enabled="yes">arm-none-eabi-objcopy -S -O srec  $(IntermediateDirectory)/$(ProjectName).elf $(IntermediateDirectory)/$(ProjectName).s19</Command>
+        <Command Enabled="yes">arm-none-eabi-objdump -D -S $(IntermediateDirectory)/$(ProjectName).elf &gt; $(IntermediateDirectory)/$(ProjectName).dass</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
