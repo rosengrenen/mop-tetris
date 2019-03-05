@@ -53,12 +53,56 @@ uint8_t field_can_move_shape(PFIELD field, PSHAPE shape, int32_t dx, int32_t dy)
 	return 1;
 }
 
+uint8_t field_is_row_full(PFIELD field, uint8_t row)
+{
+	uint8_t empty_tiles = 0;
+	for (uint32_t x = 0; x < FIELD_WIDTH; ++x)
+	{
+		if (!field->get_tile(field, x, row))
+		{
+			empty_tiles++;
+		}
+	}
+	return empty_tiles == 0;
+}
+
 uint8_t field_full_rows(PFIELD field)
 {
-	return 0;
+	uint8_t full_rows = 0;
+	for (uint32_t y = 0; y < FIELD_HEIGHT; ++y)
+	{
+		if (field_is_row_full(field, y))
+		{
+			full_rows++;
+		}
+	}
+	return full_rows;
 }
 
 void field_remove_full_rows(PFIELD field)
 {
-	return;
+	for (uint32_t y = 0; y < FIELD_HEIGHT; ++y)
+	{
+		if (field_is_row_full(field, y))
+		{
+			for (uint32_t row = y; row > 0; --row)
+			{
+				for (uint32_t x = 0; x < FIELD_WIDTH; ++x)
+				{
+					if (field->get_tile(field, x, row - 1))
+					{
+						field->set_tile(field, x, row);
+					}
+					else
+					{
+						field->unset_tile(field, x, row);
+					}
+				}
+			}
+			for (uint32_t x = 0; x < FIELD_WIDTH; ++x)
+			{
+				field->unset_tile(field, x, 0);
+			}
+		}
+	}
 }

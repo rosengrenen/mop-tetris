@@ -96,8 +96,9 @@ void shape_rotate_anticlockwise(PSHAPE shape)
 {
 	for (uint32_t i = 0; i < 4; ++i)
 	{
+		uint8_t tmp = shape->geometry.size - shape->geometry.points[i].x - 1;
 		shape->geometry.points[i].x = shape->geometry.points[i].y;
-		shape->geometry.points[i].y = shape->geometry.size - shape->geometry.points[i].x - 1;
+		shape->geometry.points[i].y = tmp;
 	}
 }
 

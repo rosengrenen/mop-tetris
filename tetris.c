@@ -156,7 +156,7 @@ void tetris_run()
 			
 			if (!field.can_move_shape(&field, &shape, 0, 0))
 			{
-				// Game over
+				tetris_stop();
 			}
 		}
 		else
