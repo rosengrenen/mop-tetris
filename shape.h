@@ -19,9 +19,13 @@ typedef struct tShape
     GEOMETRY geometry;
     POINT position;
 	void (* draw) (struct tShape *);
+	void (* rotate_clockwise) (struct tShape *);
+	void (* rotate_anticlockwise) (struct tShape *);
 } SHAPE, *PSHAPE;
 
 void shape_draw(PSHAPE geometry);
+void shape_rotate_clockwise(PSHAPE shape);
+void shape_rotate_anticlockwise(PSHAPE shape);
 GEOMETRY random_geometry();
 
 #endif // SHAPE_H

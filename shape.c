@@ -40,9 +40,9 @@ GEOMETRY z_geometry = {
 GEOMETRY l_geometry = {
     3,
     {
-        { 0, 0 },
-        { 0, 1 }, 
-        { 0, 2 }, { 1, 2 }
+        { 1, 0 },
+        { 1, 1 }, 
+        { 1, 2 }, { 2, 2 }
     }
 };
 
@@ -80,6 +80,25 @@ void shape_draw(PSHAPE shape)
         tile_draw(shape->position.x + shape->geometry.points[i].x,
                      shape->position.y + shape->geometry.points[i].y);
     }
+}
+
+void shape_rotate_clockwise(PSHAPE shape)
+{
+	for (uint32_t i = 0; i < 4; ++i)
+	{
+		uint8_t tmp = shape->geometry.points[i].x;
+		shape->geometry.points[i].x = shape->geometry.size - shape->geometry.points[i].y - 1;
+		shape->geometry.points[i].y = tmp;
+	}
+}
+
+void shape_rotate_anticlockwise(PSHAPE shape)
+{
+	for (uint32_t i = 0; i < 4; ++i)
+	{
+		shape->geometry.points[i].x = shape->geometry.points[i].y;
+		shape->geometry.points[i].y = shape->geometry.size - shape->geometry.points[i].x - 1;
+	}
 }
 
 GEOMETRY random_geometry()

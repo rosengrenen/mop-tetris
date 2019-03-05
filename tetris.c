@@ -18,19 +18,26 @@ void tetris_run();
 
 uint8_t running = 0;
 
+uint32_t score = 0;
+
 FIELD field = {
 	{},
 	field_set_tile,
 	field_unset_tile,
 	field_get_tile,
 	field_draw,
-	field_add_shape
+	field_add_shape,
+	field_can_move_shape,
+	field_full_rows,
+	field_remove_full_rows
 };
 
 SHAPE shape = {
 	{},
 	{ 0, 0 },
-	shape_draw
+	shape_draw,
+	shape_rotate_clockwise,
+	shape_rotate_anticlockwise
 };
 
 void tetris_init()
@@ -77,25 +84,86 @@ void tetris_run()
 	while (running)
 	{
 		// Check keyboard input and move/rotate/drop shape accordingly
+		uint8_t rows_dropped = 0;
 		switch (keyb())
 		{
 			case MOVE_LEFT:
+				if (field.can_move_shape(&field, &shape, -1, 0))
+				{
+					shape.position.x--;
+				}
 				break;
 			case MOVE_RIGHT:
+				if (field.can_move_shape(&field, &shape, 1, 0))
+				{
+					shape.position.x++;
+				}
 				break;
 			case ROTATE_CLOCKWISE:
+				shape.rotate_clockwise(&shape);
+				if (!field.can_move_shape(&field, &shape, 0, 0))
+				{
+					shape.rotate_anticlockwise(&shape);
+				}
 				break;
 			case ROTATE_ANTICLOCKWISE:
+				shape.rotate_anticlockwise(&shape);
+				if (!field.can_move_shape(&field, &shape, 0, 0))
+				{
+					shape.rotate_clockwise(&shape);
+				}
 				break;
 			case DROP:
+				while (field.can_move_shape(&field, &shape, 0, 1))
+				{
+					shape.position.y++;
+					rows_dropped++;
+				}
 				break;
 		}
 		
-		// Check if shape can be moved down one step, and do if so, else add shape to field and generate new random shape
-		// If shape is added to field, check if there are any full rows
-		// Add points: https://tetris.wiki/Scoring
+		if (rows_dropped > 0)
+		{
+			score += rows_dropped + 1;
+		}
 		
-		// Check lose condition
+		if (!field.can_move_shape(&field, &shape, 0, 1))
+		{
+			field.add_shape(&field, &shape);
+			uint8_t full_rows = field.full_rows(&field);
+			switch (full_rows)
+			{
+				case 1:
+					score += 100;
+					break;
+				case 2:
+					score += 400;
+					break;
+				case 3:
+					score += 900;
+					break;
+				case 4:
+					score += 2000;
+					break;
+			}
+			
+			if (full_rows > 0)
+			{
+				field.remove_full_rows(&field);
+			}
+		
+			new_shape();
+			
+			if (!field.can_move_shape(&field, &shape, 0, 0))
+			{
+				// Game over
+			}
+		}
+		else
+		{
+			shape.position.y++;
+		}
+		
 		
 		field.draw(&field);
 		shape.draw(&shape);
