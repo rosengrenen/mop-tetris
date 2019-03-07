@@ -20,7 +20,7 @@ void tetris_run();
 uint8_t running = 0;
 
 uint32_t score = 0;
-uint8_t difficulty = 0;
+uint8_t difficulty = 1;
 
 #define MENU_STATE 0
 #define DIFFICULTY_STATE 1
@@ -101,13 +101,12 @@ void tetris_run()
 	
 	new_shape();
 
+    uint8_t first = 1;
+
 	while (running)
 	{
         if (state == MENU_STATE)
         {
-            char buffer[10];
-            uint32_t value = 345678;
-            int_to_string(value, buffer, 10);
             ascii_clear();
             ascii_print_at("(1) Start game", 1, 1);
             ascii_print_at("(2) Set difficulty", 1, 2);
@@ -117,10 +116,14 @@ void tetris_run()
                 if (key == 1)
                 {
                     state = PLAYING_STATE;
+                    score = 0;
+                    first = 1;
+                    break;
                 }
                 else if (key == 2)
                 {
                     state = DIFFICULTY_STATE;
+                    break;
                 }
             }
         }
@@ -146,100 +149,107 @@ void tetris_run()
         {
             // Check keyboard input and move/rotate/drop shape accordingly
             uint8_t rows_dropped = 0;
-            switch (keyb())
+            if (!first)
             {
-                case MOVE_LEFT:
-                    if (field.can_move_shape(&field, &shape, -1, 0))
-                    {
-                        shape.position.x--;
-                    }
-                    break;
-                case MOVE_RIGHT:
-                    if (field.can_move_shape(&field, &shape, 1, 0))
-                    {
-                        shape.position.x++;
-                    }
-                    break;
-                case ROTATE_CLOCKWISE:
-                    shape.rotate_clockwise(&shape);
-                    if (!field.can_move_shape(&field, &shape, 0, 0))
-                    {
-                        shape.rotate_anticlockwise(&shape);
-                    }
-                    break;
-                case ROTATE_ANTICLOCKWISE:
-                    shape.rotate_anticlockwise(&shape);
-                    if (field.can_move_shape(&field, &shape, 0, 0))
-                    {
-                        //
-                    }
-                    else if (field.can_move_shape(&field, &shape, 1, 0))
-                    {
-                        shape.position.x++;
-                    }
-                    else if (field.can_move_shape(&field, &shape, -1, 0))
-                    {
-                        shape.position.x--;
-                    }
-                    else if (field.can_move_shape(&field, &shape, 2, 0))
-                    {
-                        shape.position.x += 2;
-                    }
-                    else if (field.can_move_shape(&field, &shape, -2, 0))
-                    {
-                        shape.position.x -= 2;
-                    }
-                    else
-                    {
+                switch (keyb())
+                {
+                    case MOVE_LEFT:
+                        if (field.can_move_shape(&field, &shape, -1, 0))
+                        {
+                            shape.position.x--;
+                        }
+                        break;
+                    case MOVE_RIGHT:
+                        if (field.can_move_shape(&field, &shape, 1, 0))
+                        {
+                            shape.position.x++;
+                        }
+                        break;
+                    case ROTATE_CLOCKWISE:
                         shape.rotate_clockwise(&shape);
-                    }
-                    break;
-                case DROP:
-                    while (field.can_move_shape(&field, &shape, 0, 1))
-                    {
-                        shape.position.y++;
-                        rows_dropped++;
-                    }
-                    break;
+                        if (!field.can_move_shape(&field, &shape, 0, 0))
+                        {
+                            shape.rotate_anticlockwise(&shape);
+                        }
+                        break;
+                    case ROTATE_ANTICLOCKWISE:
+                        shape.rotate_anticlockwise(&shape);
+                        if (field.can_move_shape(&field, &shape, 0, 0))
+                        {
+                            //
+                        }
+                        else if (field.can_move_shape(&field, &shape, 1, 0))
+                        {
+                            shape.position.x++;
+                        }
+                        else if (field.can_move_shape(&field, &shape, -1, 0))
+                        {
+                            shape.position.x--;
+                        }
+                        else if (field.can_move_shape(&field, &shape, 2, 0))
+                        {
+                            shape.position.x += 2;
+                        }
+                        else if (field.can_move_shape(&field, &shape, -2, 0))
+                        {
+                            shape.position.x -= 2;
+                        }
+                        else
+                        {
+                            shape.rotate_clockwise(&shape);
+                        }
+                        break;
+                    case DROP:
+                        while (field.can_move_shape(&field, &shape, 0, 1))
+                        {
+                            shape.position.y++;
+                            rows_dropped++;
+                        }
+                        break;
+                }
             }
             
             if (rows_dropped > 0)
             {
-                score += rows_dropped + 1;
+                score += rows_dropped * difficulty;
             }
             
             if (!field.can_move_shape(&field, &shape, 0, 1))
             {
                 field.add_shape(&field, &shape);
                 uint8_t full_rows = field.full_rows(&field);
-                switch (full_rows)
-                {
-                    case 1:
-                        score += 100;
-                        break;
-                    case 2:
-                        score += 400;
-                        break;
-                    case 3:
-                        score += 900;
-                        break;
-                    case 4:
-                        score += 2000;
-                        break;
-                }
+                
+                uint8_t multiplier = 1;
                 
                 if (full_rows > 0)
                 {
+                    // TODO: check for perfect clear
+                    // if perfect clear, multiplier = 10
                     field.remove_full_rows(&field);
                 }
                 
-                if (full_rows || rows_dropped)
+                switch (full_rows)
+                {
+                    case 1:
+                        score += (100 * difficulty * multiplier);
+                        break;
+                    case 2:
+                        score += (400 * difficulty * multiplier);
+                        break;
+                    case 3:
+                        score += (900 * difficulty * multiplier);
+                        break;
+                    case 4:
+                        score += (2000 * difficulty * multiplier);
+                        break;
+                }                
+                
+                if (full_rows || rows_dropped || first)
                 {
                     ascii_clear();
                     ascii_print_at("Score: ", 1, 1);
                     ascii_print_at("", 7, 1);
                     ascii_print_at("Level: ", 1, 2);
-                    char level_string[4];
                     ascii_print_at("", 7, 2);
                 }
             
@@ -252,17 +262,29 @@ void tetris_run()
             }
             else
             {
-                shape.position.y++;
+                if (!first)
+                {
+                    shape.position.y++;
+                }
             }
             
+            first = 0;
             
             field.draw(&field);
             shape.draw(&shape);
             graphic_swap();
+            
+            //TODO: difficulty speed
+            delay_milli(50);
         }
         else if (state == GAME_OVER_STATE)
         {
-            
+            ascii_clear();
+            ascii_print_at("Game over!", 1, 1);
+            ascii_print_at("Score: ", 1, 2);
+            ascii_print_at("", 7, 2);
+            delay_milli(5000);
+            state = MENU_STATE;
         }
 	}
 }
