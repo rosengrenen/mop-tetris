@@ -5,7 +5,7 @@
 
 typedef struct tPoint
 {
-    uint8_t x, y;
+    int32_t x, y;
 } POINT;
 
 typedef struct tGeometry

@@ -17,16 +17,16 @@
 
 void tetris_run();
 
-uint8_t running = 0;
+int32_t running = 0;
 
-uint32_t score = 0;
-uint8_t difficulty = 1;
+int32_t score = 0;
+int32_t difficulty = 1;
 
 #define MENU_STATE 0
 #define DIFFICULTY_STATE 1
 #define PLAYING_STATE 2
 #define GAME_OVER_STATE 3
-uint8_t state = MENU_STATE;
+int32_t state = MENU_STATE;
 
 FIELD field = {
 	{},
@@ -37,7 +37,8 @@ FIELD field = {
 	field_add_shape,
 	field_can_move_shape,
 	field_full_rows,
-	field_remove_full_rows
+	field_remove_full_rows,
+	field_clear,
 };
 
 SHAPE shape = {
@@ -83,25 +84,40 @@ static void new_shape()
 	shape.position.y = 0;
 }
 
-void int_to_string(int32_t value, char* buffer, uint32_t buffer_size)
+void int_to_string(int32_t value, char* buffer, int32_t buffer_size)
 {
-    int32_t index = 0;
-    while (index < buffer_size - 1 && value != 0)
-    {
-        buffer[index] = '0' + value % 10;
-        value /= 10;
-        index++;
-    }
-    buffer[index] = '\0';
+	if (value == 0)
+	{
+		buffer[0] = '0';
+		buffer[1] = '\0';
+	}
+	else
+	{
+		int32_t index = 0;
+		while (index < buffer_size - 1 && value != 0)
+		{
+			buffer[index] = '0' + value % 10;
+			value /= 10;
+			index++;
+		}
+		char buff[32];
+		for (int32_t i = 0; i < index; ++i)
+		{
+			buff[index - i - 1] = buffer[i];
+		}
+		for (int32_t i = 0; i < index; ++i)
+		{
+			buffer[i] = buff[i];
+		}
+		buffer[index] = '\0';
+	}
 }
 
 void tetris_run()
 {
 	running = 1;
-	
-	new_shape();
 
-    uint8_t first = 1;
+    int32_t first = 1;
 
 	while (running)
 	{
@@ -112,7 +128,7 @@ void tetris_run()
             ascii_print_at("(2) Set difficulty", 1, 2);
             while (1)
             {
-                unsigned char key = keyb();
+                int32_t key = keyb();
                 if (key == 1)
                 {
                     state = PLAYING_STATE;
@@ -126,6 +142,7 @@ void tetris_run()
                     break;
                 }
             }
+			delay_milli(100);
         }
         else if (state == DIFFICULTY_STATE)
         {
@@ -144,11 +161,23 @@ void tetris_run()
                 }
             }
             state = MENU_STATE;
+			delay_milli(100);
         }
         else if (state == PLAYING_STATE)
         {
-            // Check keyboard input and move/rotate/drop shape accordingly
-            uint8_t rows_dropped = 0;
+			graphic_clear();
+			if (first)
+			{
+				graphic_clear_screen();
+				graphic_swap();
+				graphic_clear();
+				field.clear(&field);
+				new_shape();
+			}
+			
+			// Check keyboard input and move/rotate/drop shape accordingly
+            int32_t rows_dropped = 0;
+			int32_t full_rows = 0;
             if (!first)
             {
                 switch (keyb())
@@ -207,67 +236,68 @@ void tetris_run()
                         }
                         break;
                 }
-            }
             
-            if (rows_dropped > 0)
-            {
-                score += rows_dropped * difficulty;
-            }
-            
-            if (!field.can_move_shape(&field, &shape, 0, 1))
-            {
-                field.add_shape(&field, &shape);
-                uint8_t full_rows = field.full_rows(&field);
+				if (rows_dropped > 0)
+				{
+					score += rows_dropped * difficulty;
+				}
+				
+				if (!field.can_move_shape(&field, &shape, 0, 1))
+				{
+					field.add_shape(&field, &shape);
+					full_rows = field.full_rows(&field);
+					
+					int32_t multiplier = 1;
+					
+					if (full_rows > 0)
+					{
+						// TODO: check for perfect clear
+						// if perfect clear, multiplier = 10
+						field.remove_full_rows(&field);
+					}
+					
+					switch (full_rows)
+					{
+						case 1:
+							score += (100 * difficulty * multiplier);
+							break;
+						case 2:
+							score += (400 * difficulty * multiplier);
+							break;
+						case 3:
+							score += (900 * difficulty * multiplier);
+							break;
+						case 4:
+							score += (2000 * difficulty * multiplier);
+							break;
+					}
+				
+					new_shape();
+					
+					if (!field.can_move_shape(&field, &shape, 0, 0))
+					{
+						state = GAME_OVER_STATE;
+					}
+				}
+				else
+				{
+					shape.position.y++;
+				}
+			}
                 
-                uint8_t multiplier = 1;
-                
-                if (full_rows > 0)
-                {
-                    // TODO: check for perfect clear
-                    // if perfect clear, multiplier = 10
-                    field.remove_full_rows(&field);
-                }
-                
-                switch (full_rows)
-                {
-                    case 1:
-                        score += (100 * difficulty * multiplier);
-                        break;
-                    case 2:
-                        score += (400 * difficulty * multiplier);
-                        break;
-                    case 3:
-                        score += (900 * difficulty * multiplier);
-                        break;
-                    case 4:
-                        score += (2000 * difficulty * multiplier);
-                        break;
-                }                
-                
-                if (full_rows || rows_dropped || first)
-                {
-                    ascii_clear();
-                    ascii_print_at("Score: ", 1, 1);
-                    ascii_print_at("", 7, 1);
-                    ascii_print_at("Level: ", 1, 2);
-                    ascii_print_at("", 7, 2);
-                }
-            
-                new_shape();
-                
-                if (!field.can_move_shape(&field, &shape, 0, 0))
-                {
-                    state = GAME_OVER_STATE;
-                }
-            }
-            else
-            {
-                if (!first)
-                {
-                    shape.position.y++;
-                }
-            }
-            
+			if (full_rows || rows_dropped || first)
+			{
+				ascii_clear();
+				ascii_print_at("Score: ", 1, 1);
+				char score_buffer[16];
+				int_to_string(score, score_buffer, 16);
+				ascii_print_at(score_buffer, 8, 1);
+				ascii_print_at("Level: ", 1, 2);
+				char difficulty_buffer[10];
+				int_to_string(difficulty, difficulty_buffer, 10);
+				ascii_print_at(difficulty_buffer, 8, 2);
+			}
+			
             first = 0;
             
             field.draw(&field);
@@ -275,15 +305,31 @@ void tetris_run()
             graphic_swap();
             
             //TODO: difficulty speed
-            delay_milli(50);
+			switch (difficulty)
+			{
+				case 1:
+					delay_milli(300);
+					break;
+				case 2:
+					delay_milli(240);
+					break;
+				case 3:
+					delay_milli(170);
+					break;
+				case 4:
+					delay_milli(100);
+					break;
+			}
         }
         else if (state == GAME_OVER_STATE)
         {
             ascii_clear();
             ascii_print_at("Game over!", 1, 1);
             ascii_print_at("Score: ", 1, 2);
-            ascii_print_at("", 7, 2);
-            delay_milli(5000);
+			char score_buffer[16];
+			int_to_string(score, score_buffer, 16);
+            ascii_print_at(score_buffer, 8, 2);
+            delay_milli(2500);
             state = MENU_STATE;
         }
 	}

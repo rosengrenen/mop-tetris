@@ -75,7 +75,7 @@ PGEOMETRY geometries[7] = {
 
 void shape_draw(PSHAPE shape)
 {
-    for (uint8_t i = 0; i < 4; ++i)
+    for (int32_t i = 0; i < 4; ++i)
     {
         tile_draw(shape->position.x + shape->geometry.points[i].x,
                      shape->position.y + shape->geometry.points[i].y);
@@ -84,9 +84,9 @@ void shape_draw(PSHAPE shape)
 
 void shape_rotate_clockwise(PSHAPE shape)
 {
-	for (uint32_t i = 0; i < 4; ++i)
+	for (int32_t i = 0; i < 4; ++i)
 	{
-		uint8_t tmp = shape->geometry.points[i].x;
+		int32_t tmp = shape->geometry.points[i].x;
 		shape->geometry.points[i].x = shape->geometry.size - shape->geometry.points[i].y - 1;
 		shape->geometry.points[i].y = tmp;
 	}
@@ -94,9 +94,9 @@ void shape_rotate_clockwise(PSHAPE shape)
 
 void shape_rotate_anticlockwise(PSHAPE shape)
 {
-	for (uint32_t i = 0; i < 4; ++i)
+	for (int32_t i = 0; i < 4; ++i)
 	{
-		uint8_t tmp = shape->geometry.size - shape->geometry.points[i].x - 1;
+		int32_t tmp = shape->geometry.size - shape->geometry.points[i].x - 1;
 		shape->geometry.points[i].x = shape->geometry.points[i].y;
 		shape->geometry.points[i].y = tmp;
 	}
@@ -104,14 +104,5 @@ void shape_rotate_anticlockwise(PSHAPE shape)
 
 GEOMETRY random_geometry()
 {
-	// TODO: Mod 7 and div 7 stall the program for some reason
-	//uint32_t random = rand();
-	//rand %= 7;
-	uint32_t random;
-	do
-	{
-		random = rand();
-		random = random - (random / 8) * 8;
-	} while (random >= 7);
-	return *geometries[random];
+	return *geometries[rand() % 7];
 }

@@ -54,8 +54,8 @@
       </Linker>
       <ResourceCompiler Options=""/>
     </GlobalSettings>
-    <Configuration Name="Debug" CompilerType="Cross GCC (arm-none-eabi)" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-g;-O0;-Wall" C_Options="-g;-O0;-mthumb;-Wall;-march=armv6-m;-msoft-float;-Wa,-adhln=test.s" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+    <Configuration Name="Debug" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g;-O0;-Wall" C_Options="-Wa,-adhln=test.s;-g;-O0;-w;-mthumb -march=armv6-m  -mfloat-abi=soft;-std=c99;-mthumb;-march=armv6-m" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
         <Preprocessor Value="SIMULATOR"/>
       </Compiler>
@@ -80,8 +80,8 @@ monitor restart</PostConnectCommands>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">$(GccArmDir)/bin/arm-none-eabi-objcopy -S -O srec  $(IntermediateDirectory)/$(ProjectName).elf $(IntermediateDirectory)/$(ProjectName).s19</Command>
-        <Command Enabled="yes">$(GccArmDir)/bin/arm-none-eabi-objdump -D -S $(IntermediateDirectory)/$(ProjectName).elf &gt; $(IntermediateDirectory)/$(ProjectName).dass</Command>
+        <Command Enabled="yes">arm-none-eabi-objcopy -S -O srec  $(IntermediateDirectory)/$(ProjectName).elf $(IntermediateDirectory)/$(ProjectName).s19</Command>
+        <Command Enabled="yes">arm-none-eabi-objdump -D -S $(IntermediateDirectory)/$(ProjectName).elf &gt; $(IntermediateDirectory)/$(ProjectName).dass</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
